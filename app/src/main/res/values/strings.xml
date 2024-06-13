@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">Assessment3_Mobpro1</string>
+
+    <string name="gambar">Gambar %1$s</string>
+
+    <string name="error">Gagal memuat data.. Koneksi error.</string>
+    <string name="try_again">Coba lagi</string>
+
+    <string name="profil">Profil</string>
+    <string name="tutup">Tutup</string>
+    <string name="logout">Logout</string>
+
+    <string name="tambah_postingan">Buat postingan baru</string>
+    <string name="batal">Batal</string>
+    <string name="posting">Posting</string>
+
+    <string name="nama_barang">Nama barang</string>
+    <string name="harga">harga</string>
+
+    <string name="pesan_hapus">Ingin menghapus postingan?</string>
+    <string name="tombol_hapus">Hapus</string>
+    <string name="tombol_batal">Batal</string>
+
 </resources>

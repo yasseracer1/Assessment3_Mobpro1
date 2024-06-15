@@ -62,7 +62,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun deleteHewan(userId: String, id: String) {
+    fun deleteBarang(userId: String, id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = BarangApi.service.deleteBarang(userId, id)

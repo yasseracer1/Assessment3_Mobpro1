@@ -41,7 +41,7 @@ interface BarangApiService {
         @Part image: MultipartBody.Part
     ): OpStatus
 
-    @DELETE("api_yasser.phpx")
+    @DELETE("api_yasser.php")
     suspend fun deleteBarang(
         @Header("Authorization") userId: String,
         @Query("id") id: String

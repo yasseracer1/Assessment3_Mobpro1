@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,11 +44,12 @@ fun BarangDialog(
 ) {
     var nama by remember { mutableStateOf("") }
     var harga by remember { mutableStateOf("") }
+    var hargaError by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier.padding(16.dp),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -64,7 +68,7 @@ fun BarangDialog(
                     label = { Text(text = stringResource(id = R.string.nama_barang)) },
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
                     ),
                     modifier = Modifier.padding(top = 8.dp)
@@ -73,9 +77,9 @@ fun BarangDialog(
                     value = harga,
                     onValueChange = { harga = it },
                     label = { Text(text = stringResource(id = R.string.harga)) },
+                    trailingIcon = { IconPicker(isError = hargaError, unit = "Rp")},
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Done
                     ),
@@ -96,13 +100,22 @@ fun BarangDialog(
                     OutlinedButton(
                         onClick = { onConfirmation(nama, harga) },
                         enabled = nama.isNotEmpty() && harga.isNotEmpty(),
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(8.dp),
                     ) {
                         Text(text = stringResource(id = R.string.posting))
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun IconPicker(isError: Boolean, unit: String) {
+    if (isError) {
+        Icon(imageVector = Icons.Filled.Warning, contentDescription = null)
+    } else {
+        Text(text = unit)
     }
 }
 

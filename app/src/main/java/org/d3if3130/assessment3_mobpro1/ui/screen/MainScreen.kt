@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -31,7 +32,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -45,12 +45,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +75,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingExcept
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.d3if3130.assessment3_mobpro1.BuildConfig
 import org.d3if3130.assessment3_mobpro1.R
 import org.d3if3130.assessment3_mobpro1.model.Barang
 import org.d3if3130.assessment3_mobpro1.model.User
@@ -94,57 +95,79 @@ fun MainScreen() {
     val errorMessage by viewModel.errorMessage
 
     var showDialog by remember { mutableStateOf(false) }
-    var showBarangDialog by remember { mutableStateOf(false) }
+    var showHewanDialog by remember { mutableStateOf(false) }
 
     var bitmap: Bitmap? by remember {
         mutableStateOf(null)
     }
     val launcher = rememberLauncherForActivityResult(CropImageContract()) {
         bitmap = getCroppedImage(context.contentResolver, it)
-        if (bitmap != null) showBarangDialog = true
+        if (bitmap != null) showHewanDialog = true
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(id = R.string.app_name))
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary
+                    containerColor = Color.Yellow,
+                    titleContentColor = Color.Black
                 ),
                 actions = {
-                        IconButton(onClick = {
-                            if (user.email.isEmpty()) {
-                                CoroutineScope(Dispatchers.IO).launch { signIn(context, dataStore) }
-                            }
-                            else {
-                                showDialog = true
-                            }
-                        }) {
+                    IconButton(onClick = {
+                        if (user.email.isEmpty()) {
+                            CoroutineScope(Dispatchers.IO).launch { signIn(context, dataStore) }
+                        }
+                        else {
+                            showDialog = true
+                        }
+                    }) {
+                        if (user.email.isEmpty()) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_account_circle_24),
                             contentDescription = stringResource(id = R.string.profil),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Color.Black
                         )
+                        } else {
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(user.photoUrl)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                placeholder = painterResource(id = R.drawable.loading_img),
+                                error = painterResource(id = R.drawable.baseline_broken_image_24),
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                            )
+                        }
                     }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                val options = CropImageContractOptions(
-                    null, CropImageOptions(
+            FloatingActionButton(
+                onClick = {
+                    val options = CropImageContractOptions(
+                        null, CropImageOptions(
                         imageSourceIncludeGallery = false,
                         imageSourceIncludeCamera = true,
                         fixAspectRatio = true
+                        )
                     )
-                )
-                launcher.launch(options)
-            }) {
+                    launcher.launch(options)
+                },
+                containerColor = Color.Yellow
+            ) {
                 Icon(
                     imageVector = Icons.Default.Add,
+                    tint = Color.Black,
                     contentDescription = stringResource(id = R.string.tambah_postingan)
                 )
             }
@@ -162,13 +185,13 @@ fun MainScreen() {
             }
         }
 
-        if (showBarangDialog) {
+        if (showHewanDialog) {
             BarangDialog(
                 bitmap = bitmap,
-                onDismissRequest = { showBarangDialog = false }
+                onDismissRequest = { showHewanDialog = false }
             ) { nama, harga ->
                 viewModel.saveData(user.email, nama, harga, bitmap!!)
-                showBarangDialog = false
+                showHewanDialog = false
             }
         }
 
@@ -208,7 +231,7 @@ fun ScreenContent(viewModel: MainViewModel, userId: String, modifier: Modifier) 
                 items(data) { barang ->
                     ListItem(
                         barang = barang,
-                        onDelete = { viewModel.deleteHewan(userId, barang.id) }
+                        onDelete = { viewModel.deleteBarang(userId, barang.id) }
                     )
                 }
             }
@@ -267,11 +290,11 @@ fun ListItem(barang: Barang, onDelete: () -> Unit) {
             Text(
                 text = barang.nama,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = Color.White,
+                fontSize = 16.sp
             )
             Text(
-                text = barang.harga,
-                fontStyle = FontStyle.Italic,
+                text = "Rp."+barang.harga,
                 fontSize = 14.sp,
                 color = Color.White
             )
@@ -284,7 +307,7 @@ fun ListItem(barang: Barang, onDelete: () -> Unit) {
         ) {
             IconButton(onClick = { showDeleteDialog = true }) {
                 Icon(
-                    tint = Color.White,
+                    tint = Color.Red,
                     painter = painterResource(R.drawable.baseline_delete_24),
                     contentDescription = stringResource(R.string.profil)
                 )
@@ -305,7 +328,7 @@ fun ListItem(barang: Barang, onDelete: () -> Unit) {
 private suspend fun signIn(context: Context, dataStore: UserDataStore) {
     val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
         .setFilterByAuthorizedAccounts(false)
-        .setServerClientId(org.d3if3130.assessment3_mobpro1.BuildConfig.API_KEY)
+        .setServerClientId(BuildConfig.API_KEY)
         .build()
 
     val request: GetCredentialRequest = GetCredentialRequest.Builder()
@@ -370,6 +393,7 @@ private fun getCroppedImage(
         ImageDecoder.decodeBitmap(source)
     }
 }
+
 
 @Preview(showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
